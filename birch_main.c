@@ -314,6 +314,8 @@ static void result_from_groups(struct birch_ptn_groups *to,
   to->size = from->size;
   memcpy(to->match_dist, from->match_dist, sizeof(from->match_dist));
 
+  ++to->match_dist[0];
+
   size_t i = 0;
   while (i < from->size) {
     struct birch_ptn_group *group_to = &to->groups[i];
@@ -591,11 +593,14 @@ static void results_print(struct birch_ptn_groups *results,
   size_t i = 0;
   while (i < results_size) {
     struct birch_ptn_groups *result = &results[i];
-    if (result->match_dist[0] == nexist_max) {
+    if (result->match_dist[MATCH_NEXIST] > nexist_max) {
       break;
     }
-    printf("%lu: %lx %lx %lx %lx\n", i + 1, result->match_dist[0],
-           result->match_dist[1], result->match_dist[2], result->match_dist[3]);
+
+    printf("%lu: %lx %lx %lx %lx\n", i + 1, result->match_dist[MATCH_NEXIST],
+           result->match_dist[MATCH_DIR_DIFF],
+           result->match_dist[MATCH_FILE_DIFF],
+           result->match_dist[MATCH_OFFS_DIFF]);
     result_print(result);
     ++i;
   }
@@ -642,11 +647,15 @@ int main(int argc, char *argv[]) {
   struct birch_ptn_groups groups;
   ssize_t results_size = parse_args(&roots, &groups, argc, argv);
   if (results_size <= 0) {
+    free(roots.roots);
+    ptn_groups_free(&groups);
     return -1;
   }
 
   if (roots.size == 0) {
     printf("At least one root path required\n");
+    free(roots.roots);
+    ptn_groups_free(&groups);
     return -1;
   }
 
@@ -658,6 +667,8 @@ int main(int argc, char *argv[]) {
       printf("%s\n", roots.roots[i]);
       ++i;
     }
+    free(roots.roots);
+    ptn_groups_free(&groups);
     return -1;
   }
 

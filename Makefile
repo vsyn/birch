@@ -14,11 +14,11 @@
 
 DEFINES :=
 
-CC := clang
-CFLAGS += -g3 -O0 -Werror -Wall -Wextra $(DEFINES:%=-D%)
+CC := gcc
+CFLAGS += -Werror -Wall -Wextra $(DEFINES:%=-D%)
 # expanded below
 DEPFLAGS = -MMD -MP -MF $(@:$(BUILD_DIR)/%.o=$(DEP_DIR)/%.d)
-LDFLAGS := -g3 -O0
+LDFLAGS :=
 SRCS := bit_arr.c dir_tree.c birch.c birch_main.c
 TARGET ?= birch
 RM := rm -rf
